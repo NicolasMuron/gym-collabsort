@@ -168,7 +168,7 @@ class Config:
     step_reward: float = 0
 
     # Negative reward when a collision happens
-    collision_penalty: float = -5
+    collision_penalty: float = -10
 
     # Negative reward for movement
     movement_penalty = -1
