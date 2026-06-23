@@ -197,13 +197,15 @@ class Board:
 
         # Draw placed objects for each arm
         self.agent_scorebar.draw(surface=self.canvas)
-        self.robot_scorebar.draw(surface=self.canvas)
+        if self.config.robot_enabled:
+            self.robot_scorebar.draw(surface=self.canvas)
 
         # Draw bases for each arm
         self.agent_arm.base.update_image(collision_penalty=collision_penalty)
         self.agent_arm._base.draw(surface=self.canvas)
-        self.robot_arm.base.update_image(collision_penalty=collision_penalty)
-        self.robot_arm._base.draw(surface=self.canvas)
+        if self.config.robot_enabled:
+            self.robot_arm.base.update_image(collision_penalty=collision_penalty)
+            self.robot_arm._base.draw(surface=self.canvas)
 
         # Draw objects
         self.objects.draw(surface=self.canvas)
@@ -235,7 +237,7 @@ class Board:
         # Draw picked objects (if any)
         if self.agent_arm.picked_object is not None:
             self.agent_arm._picked_object.draw(surface=self.canvas)
-        if self.robot_arm.picked_object is not None:
+        if self.config.robot_enabled and self.robot_arm.picked_object is not None:
             self.robot_arm._picked_object.draw(surface=self.canvas)
 
         # Draw agent arm gripper
@@ -249,28 +251,29 @@ class Board:
             width=self.config.arm_line_thickness,
         )
 
-        # Draw robot arm gripper
-        self.robot_arm._gripper.draw(surface=self.canvas)
-        # Draw line between robot arm base and gripper
-        pygame.draw.line(
-            surface=self.canvas,
-            color="black",
-            start_pos=self.robot_arm.base.location_abs,
-            end_pos=self.robot_arm.gripper.location_abs,
-            width=self.config.arm_line_thickness,
-        )
+        if self.config.robot_enabled:
+            # Draw robot arm gripper
+            self.robot_arm._gripper.draw(surface=self.canvas)
+            # Draw line between robot arm base and gripper
+            pygame.draw.line(
+                surface=self.canvas,
+                color="black",
+                start_pos=self.robot_arm.base.location_abs,
+                end_pos=self.robot_arm.gripper.location_abs,
+                width=self.config.arm_line_thickness,
+            )
 
-        # Display robot reward
-        self.robot_reward_text.render_to(
-            self.canvas,
-            # Display reward to the left of robot arm base
-            dest=(
-                10,
-                self.config.scorebar_height + 15,
-            ),
-            text=f"Reward: {robot_reward:.0f}",
-            size=self.config.metric_text_size,
-        )
+            # Display robot reward
+            self.robot_reward_text.render_to(
+                self.canvas,
+                # Display reward to the left of robot arm base
+                dest=(
+                    10,
+                    self.config.scorebar_height + 15,
+                ),
+                text=f"Reward: {robot_reward:.0f}",
+                size=self.config.metric_text_size,
+            )
 
         # Display agent reward
         self.agent_reward_text.render_to(

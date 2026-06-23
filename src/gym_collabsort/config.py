@@ -67,6 +67,9 @@ class Config:
     # Frames Per Second for environment rendering
     render_fps: int = 5
 
+    # Whether the robot arm is enabled in the environment
+    robot_enabled: bool = True
+
     # ---------- Window and board ----------
 
     # Number of board rows

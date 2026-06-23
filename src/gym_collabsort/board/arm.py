@@ -128,8 +128,11 @@ class Arm:
 
         self.n_placed_objects = 0
 
-    def collide_arm(self, arm: Arm) -> bool:
+    def collide_arm(self, arm: Arm | None) -> bool:
         """Check if the arm collides with the other arm"""
+
+        if arm is None:
+            return False
 
         # Only grippers can collide
         return (
@@ -141,7 +144,7 @@ class Arm:
         self,
         action: Action,
         objects: Group[Object],
-        other_arm: Arm,
+        other_arm: Arm | None,
     ) -> tuple[bool, Object | None, Object | None]:
         """
         Handle the chosen action for the arm. Return:
@@ -196,7 +199,7 @@ class Arm:
         return collision, placed_object, picked_object
 
     def _move(
-        self, row_offset: int, objects: Group[Object], other_arm: Arm
+        self, row_offset: int, objects: Group[Object], other_arm: Arm | None
     ) -> tuple[bool, Object | None]:
         """
         Move the arm gripper vertically (up if row offset is negative, down otherwise).

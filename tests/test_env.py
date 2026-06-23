@@ -94,6 +94,40 @@ def test_robotic_agent(pause_at_end: bool = False) -> None:
     env.close()
 
 
+def test_disabled_robot_env() -> None:
+    """Test environment with robot arm disabled"""
+
+    config = Config(robot_enabled=False, render_mode=RenderMode.RGB_ARRAY)
+    env = CollabSortEnv(config=config)
+    obs, info = env.reset()
+
+    assert info["n_collisions"] == 0
+    assert info["n_placed_objects"] == 0
+    assert env.robot is None
+
+    # Check observation format
+    assert "self" in obs
+    assert "robot" in obs
+    assert "moving_objects" in obs
+
+    # Robot coordinates should still be returned, corresponding to robot retracted base location [1, 4]
+    assert (obs["robot"] == [1, 4]).all()
+
+    # Step the environment
+    for _ in range(20):
+        obs, reward, terminated, truncated, info = env.step(action=env.action_space.sample())
+        # Robot position must remain retracted
+        assert (obs["robot"] == [1, 4]).all()
+        # No collisions should ever occur because the robot arm is not active
+        assert info["n_collisions"] == 0
+
+    frame = env.render()
+    assert frame is not None
+    assert frame.ndim == 3
+
+    env.close()
+
+
 if __name__ == "__main__":
     # Standalone execution with pause at end
     test_robotic_agent(pause_at_end=True)
