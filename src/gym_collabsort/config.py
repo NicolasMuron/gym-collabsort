@@ -68,7 +68,7 @@ class Config:
     render_fps: int = 5
 
     # Whether the robot arm is enabled in the environment
-    robot_enabled: bool = True
+    robot_enabled: bool = False
 
     # ---------- Window and board ----------
 
