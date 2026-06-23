@@ -99,15 +99,9 @@ class Board:
     ) -> None:
         """Add a new object to the board"""
 
-        # Randomly choose object treadmill
-        if self.rng.choice((0, 1)):
-            obj_y: float = (
-                self.config.upper_treadmill_row - 0.5
-            ) * self.config.board_cell_size
-        else:
-            obj_y: float = (
-                self.config.lower_treadmill_row - 0.5
-            ) * self.config.board_cell_size
+        # Randomly choose object treadmill among the active ones
+        chosen_row: int = self.rng.choice(self.config.treadmill_rows)
+        obj_y: float = (chosen_row - 0.5) * self.config.board_cell_size
 
         # Randomly generate object attributes
         obj_color: Color = self.rng.choice(list(Color))
@@ -210,13 +204,13 @@ class Board:
         # Draw objects
         self.objects.draw(surface=self.canvas)
 
-        # Draw treadmills lines just aboce and below objects
-        for treadmill_row in (
-            self.config.upper_treadmill_row - 1,
-            self.config.upper_treadmill_row,
-            self.config.lower_treadmill_row - 1,
-            self.config.lower_treadmill_row,
-        ):
+        # Draw treadmill lines just above and below each active treadmill row
+        # Use a set to avoid duplicate lines when two treadmills are adjacent
+        treadmill_line_rows: set[int] = set()
+        for row in self.config.treadmill_rows:
+            treadmill_line_rows.add(row - 1)
+            treadmill_line_rows.add(row)
+        for treadmill_row in sorted(treadmill_line_rows):
             pygame.draw.line(
                 surface=self.canvas,
                 color="black",

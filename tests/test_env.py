@@ -128,6 +128,48 @@ def test_disabled_robot_env() -> None:
     env.close()
 
 
+def test_configurable_treadmills() -> None:
+    """Test environment with various treadmill configurations"""
+
+    treadmill_configs = [
+        ("upper",),
+        ("middle",),
+        ("lower",),
+        ("upper", "middle"),
+        ("upper", "lower"),
+        ("middle", "lower"),
+        ("upper", "middle", "lower"),
+    ]
+
+    for active in treadmill_configs:
+        config = Config(
+            active_treadmills=active,
+            render_mode=RenderMode.RGB_ARRAY,
+            n_objects=20,
+        )
+        env = CollabSortEnv(config=config)
+        env.reset()
+
+        # Run enough steps to spawn several objects
+        for _ in range(100):
+            env.step(action=env.action_space.sample())
+
+        # All spawned objects should be on an active treadmill row
+        active_rows = set(config.treadmill_rows)
+        for obj in env.board.objects:
+            assert obj.coords.row in active_rows, (
+                f"Object at row {obj.coords.row} not in active rows {active_rows} "
+                f"for config active_treadmills={active}"
+            )
+
+        # Rendering must work
+        frame = env.render()
+        assert frame is not None
+        assert frame.ndim == 3
+
+        env.close()
+
+
 if __name__ == "__main__":
     # Standalone execution with pause at end
     test_robotic_agent(pause_at_end=True)

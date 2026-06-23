@@ -68,12 +68,12 @@ class Config:
     render_fps: int = 5
 
     # Whether the robot arm is enabled in the environment
-    robot_enabled: bool = False
+    robot_enabled: bool = True
 
     # ---------- Window and board ----------
 
     # Number of board rows
-    n_rows: int = 10
+    n_rows: int = 11
 
     # Number of board columns
     n_cols: int = 16
@@ -123,11 +123,29 @@ class Config:
 
     # ---------- Treadmills ----------
 
-    # Board row for the uppoer treadmill
-    upper_treadmill_row = 4
+    # Board row for the upper treadmill
+    upper_treadmill_row: int = 4
+
+    # Board row for the middle treadmill (equidistant from robot row 1 and agent row 11)
+    middle_treadmill_row: int = 6
 
     # Board row for the lower treadmill
-    lower_treadmill_row = 7
+    lower_treadmill_row: int = 8
+
+    # Active treadmills: any combination of "upper", "middle", "lower"
+    # Must contain at least one value.
+    active_treadmills: tuple[str, ...] = ("upper", "middle", "lower")
+
+    @property
+    def treadmill_rows(self) -> list[int]:
+        """Return the list of row numbers for the active treadmills"""
+
+        row_map = {
+            "upper": self.upper_treadmill_row,
+            "middle": self.middle_treadmill_row,
+            "lower": self.lower_treadmill_row,
+        }
+        return [row_map[name] for name in ("upper", "middle", "lower") if name in self.active_treadmills]
 
     # Thickness of treadmill delimitation lines in pixels
     treadmill_line_thickness: int = 1
