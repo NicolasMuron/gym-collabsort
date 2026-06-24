@@ -68,7 +68,7 @@ class Config:
     render_fps: int = 5
 
     # Whether the robot arm is enabled in the environment
-    robot_enabled: bool = True
+    robot_enabled: bool = False
 
     # ---------- Window and board ----------
 
@@ -134,7 +134,7 @@ class Config:
 
     # Active treadmills: any combination of "upper", "middle", "lower"
     # Must contain at least one value.
-    active_treadmills: tuple[str, ...] = ("upper", "lower")
+    active_treadmills: tuple[str, ...] = ("upper","middle","lower")
 
     @property
     def treadmill_rows(self) -> list[int]:
