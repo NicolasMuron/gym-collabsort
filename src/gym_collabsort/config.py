@@ -134,7 +134,7 @@ class Config:
 
     # Active treadmills: any combination of "upper", "middle", "lower"
     # Must contain at least one value.
-    active_treadmills: tuple[str, ...] = ("upper","middle","lower")
+    active_treadmills: tuple[str, ...] = ("upper", "middle", "lower")
 
     @property
     def treadmill_rows(self) -> list[int]:
@@ -145,7 +145,11 @@ class Config:
             "middle": self.middle_treadmill_row,
             "lower": self.lower_treadmill_row,
         }
-        return [row_map[name] for name in ("upper", "middle", "lower") if name in self.active_treadmills]
+        return [
+            row_map[name]
+            for name in ("upper", "middle", "lower")
+            if name in self.active_treadmills
+        ]
 
     # Thickness of treadmill delimitation lines in pixels
     treadmill_line_thickness: int = 1

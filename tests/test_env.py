@@ -115,7 +115,9 @@ def test_disabled_robot_env() -> None:
 
     # Step the environment
     for _ in range(20):
-        obs, reward, terminated, truncated, info = env.step(action=env.action_space.sample())
+        obs, reward, terminated, truncated, info = env.step(
+            action=env.action_space.sample()
+        )
         # Robot position must remain retracted
         assert (obs["robot"] == [1, 4]).all()
         # No collisions should ever occur because the robot arm is not active
