@@ -68,7 +68,7 @@ class Config:
     render_fps: int = 5
 
     # Whether the robot arm is enabled in the environment
-    robot_enabled: bool = False
+    robot_enabled: bool = True
 
     # ---------- Window and board ----------
 
@@ -134,7 +134,7 @@ class Config:
 
     # Active treadmills: any combination of "upper", "middle", "lower"
     # Must contain at least one value.
-    active_treadmills: tuple[str, ...] = ("lower",)
+    active_treadmills: tuple[str, ...] = ("upper", "lower")
 
     @property
     def treadmill_rows(self) -> list[int]:
@@ -196,7 +196,7 @@ class Config:
     collision_penalty: float = -10
 
     # Negative reward for movement
-    movement_penalty = -1
+    movement_penalty = -0.1
 
     @property
     def agent_rewards(self) -> np.ndarray:
