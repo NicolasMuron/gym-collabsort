@@ -284,6 +284,14 @@ class CollabSortEnv(gym.Env):
 
         # Update world state
         self.n_removed_objects += self.board.animate()
+        if self.config.reward_noise_std > 0:
+            agent_reward += float(
+                self.np_random.normal(
+                    loc=0.0,
+                    scale=self.config.reward_noise_std,
+                )
+            )
+
         self.agent_episode_reward += agent_reward
         self.robot_episode_reward += robot_reward
 

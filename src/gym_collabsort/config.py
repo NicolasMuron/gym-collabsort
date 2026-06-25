@@ -198,6 +198,9 @@ class Config:
     # Negative reward for movement
     movement_penalty = -1
 
+    # Standard deviation of Gaussian noise added to the agent reward
+    reward_noise_std: float = 1.0
+
     @property
     def agent_rewards(self) -> np.ndarray:
         """Return the rewards array associated to object properties for the agent"""

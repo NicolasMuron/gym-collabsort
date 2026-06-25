@@ -7,7 +7,7 @@ import pygame
 from gymnasium.utils.env_checker import check_env
 
 import gym_collabsort
-from gym_collabsort.config import Config, RenderMode
+from gym_collabsort.config import Action, Config, RenderMode
 from gym_collabsort.envs.env import CollabSortEnv
 from gym_collabsort.envs.robot import Robot
 
@@ -62,6 +62,23 @@ def test_random_agent() -> None:
         _, _, _, _, _ = env.step(action=env.action_space.sample())
 
     env.close()
+
+
+def test_reward_noise_is_applied() -> None:
+    """Test that configured reward noise affects the returned reward"""
+
+    config = Config(
+        reward_noise_std=1.0,
+        render_mode=RenderMode.RGB_ARRAY,
+        robot_enabled=False,
+    )
+    env = CollabSortEnv(config=config)
+    env.reset(seed=0)
+
+    first_reward = env.step(action=Action.NONE.value)[1]
+    second_reward = env.step(action=Action.NONE.value)[1]
+
+    assert first_reward != second_reward
 
 
 def test_robotic_agent(pause_at_end: bool = False) -> None:
