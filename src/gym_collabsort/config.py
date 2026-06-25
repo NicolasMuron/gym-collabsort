@@ -210,4 +210,4 @@ class Config:
         """Return the rewards array associated to object properties for the robot"""
 
         # Rows are indiced by object color, columns by object shape
-        return np.array([[8, 7, 6], [5, 4, 3], [2, 1, 0]])
+        return np.array([[0, 1, 2],[3, 4, 5], [6, 7, 8]])
