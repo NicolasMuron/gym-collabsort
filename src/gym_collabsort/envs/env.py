@@ -67,11 +67,14 @@ class CollabSortEnv(gym.Env):
         self.board = Board(rng=self.np_random, config=self.config)
 
         # Create robot
-        self.robot = Robot(
-            board=self.board,
-            arm=self.board.robot_arm,
-            rewards=config.robot_rewards,
-        )
+        if self.config.robot_enabled:
+            self.robot = Robot(
+                board=self.board,
+                arm=self.board.robot_arm,
+                rewards=config.robot_rewards,
+            )
+        else:
+            self.robot = None
 
         # Number of removed objects: placed by any arm or fallen from any treadmill.
         # Used to assess the end of episode
@@ -198,18 +201,26 @@ class CollabSortEnv(gym.Env):
 
         # Apply robot action.
         # Robot can move or pick only if it is not currently moving back to its base
-        robot_action = (
-            self.robot.choose_action()
-            if not self.robot.arm.moving_back
-            else Action.NONE
-        )
-        robot_collision, robot_placed_object, robot_picked_object = (
-            self.board.robot_arm.act(
-                action=robot_action,
-                objects=self.board.objects,
-                other_arm=self.board.agent_arm,
+        if self.config.robot_enabled and self.robot is not None:
+            robot_action = (
+                self.robot.choose_action()
+                if not self.robot.arm.moving_back
+                else Action.NONE
             )
-        )
+            robot_collision, robot_placed_object, robot_picked_object = (
+                self.board.robot_arm.act(
+                    action=robot_action,
+                    objects=self.board.objects,
+                    other_arm=self.board.agent_arm,
+                )
+            )
+        else:
+            robot_action = Action.NONE
+            robot_collision, robot_placed_object, robot_picked_object = (
+                False,
+                None,
+                None,
+            )
 
         # Apply agent action.
         # Agent can move or pick only if it is not currently moving back to its base
@@ -220,7 +231,7 @@ class CollabSortEnv(gym.Env):
             self.board.agent_arm.act(
                 action=agent_action,
                 objects=self.board.objects,
-                other_arm=self.board.robot_arm,
+                other_arm=self.board.robot_arm if self.config.robot_enabled else None,
             )
         )
 
@@ -273,6 +284,14 @@ class CollabSortEnv(gym.Env):
 
         # Update world state
         self.n_removed_objects += self.board.animate()
+        if self.config.reward_noise_std > 0:
+            agent_reward += float(
+                self.np_random.normal(
+                    loc=0.0,
+                    scale=self.config.reward_noise_std,
+                )
+            )
+
         self.agent_episode_reward += agent_reward
         self.robot_episode_reward += robot_reward
 
