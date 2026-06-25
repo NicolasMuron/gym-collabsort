@@ -99,15 +99,9 @@ class Board:
     ) -> None:
         """Add a new object to the board"""
 
-        # Randomly choose object treadmill
-        if self.rng.choice((0, 1)):
-            obj_y: float = (
-                self.config.upper_treadmill_row - 0.5
-            ) * self.config.board_cell_size
-        else:
-            obj_y: float = (
-                self.config.lower_treadmill_row - 0.5
-            ) * self.config.board_cell_size
+        # Randomly choose object treadmill among the active ones
+        chosen_row: int = self.rng.choice(self.config.treadmill_rows)
+        obj_y: float = (chosen_row - 0.5) * self.config.board_cell_size
 
         # Randomly generate object attributes
         obj_color: Color = self.rng.choice(list(Color))
@@ -197,24 +191,26 @@ class Board:
 
         # Draw placed objects for each arm
         self.agent_scorebar.draw(surface=self.canvas)
-        self.robot_scorebar.draw(surface=self.canvas)
+        if self.config.robot_enabled:
+            self.robot_scorebar.draw(surface=self.canvas)
 
         # Draw bases for each arm
         self.agent_arm.base.update_image(collision_penalty=collision_penalty)
         self.agent_arm._base.draw(surface=self.canvas)
-        self.robot_arm.base.update_image(collision_penalty=collision_penalty)
-        self.robot_arm._base.draw(surface=self.canvas)
+        if self.config.robot_enabled:
+            self.robot_arm.base.update_image(collision_penalty=collision_penalty)
+            self.robot_arm._base.draw(surface=self.canvas)
 
         # Draw objects
         self.objects.draw(surface=self.canvas)
 
-        # Draw treadmills lines just aboce and below objects
-        for treadmill_row in (
-            self.config.upper_treadmill_row - 1,
-            self.config.upper_treadmill_row,
-            self.config.lower_treadmill_row - 1,
-            self.config.lower_treadmill_row,
-        ):
+        # Draw treadmill lines just above and below each active treadmill row
+        # Use a set to avoid duplicate lines when two treadmills are adjacent
+        treadmill_line_rows: set[int] = set()
+        for row in self.config.treadmill_rows:
+            treadmill_line_rows.add(row - 1)
+            treadmill_line_rows.add(row)
+        for treadmill_row in sorted(treadmill_line_rows):
             pygame.draw.line(
                 surface=self.canvas,
                 color="black",
@@ -235,7 +231,7 @@ class Board:
         # Draw picked objects (if any)
         if self.agent_arm.picked_object is not None:
             self.agent_arm._picked_object.draw(surface=self.canvas)
-        if self.robot_arm.picked_object is not None:
+        if self.config.robot_enabled and self.robot_arm.picked_object is not None:
             self.robot_arm._picked_object.draw(surface=self.canvas)
 
         # Draw agent arm gripper
@@ -249,28 +245,29 @@ class Board:
             width=self.config.arm_line_thickness,
         )
 
-        # Draw robot arm gripper
-        self.robot_arm._gripper.draw(surface=self.canvas)
-        # Draw line between robot arm base and gripper
-        pygame.draw.line(
-            surface=self.canvas,
-            color="black",
-            start_pos=self.robot_arm.base.location_abs,
-            end_pos=self.robot_arm.gripper.location_abs,
-            width=self.config.arm_line_thickness,
-        )
+        if self.config.robot_enabled:
+            # Draw robot arm gripper
+            self.robot_arm._gripper.draw(surface=self.canvas)
+            # Draw line between robot arm base and gripper
+            pygame.draw.line(
+                surface=self.canvas,
+                color="black",
+                start_pos=self.robot_arm.base.location_abs,
+                end_pos=self.robot_arm.gripper.location_abs,
+                width=self.config.arm_line_thickness,
+            )
 
-        # Display robot reward
-        self.robot_reward_text.render_to(
-            self.canvas,
-            # Display reward to the left of robot arm base
-            dest=(
-                10,
-                self.config.scorebar_height + 15,
-            ),
-            text=f"Reward: {robot_reward:.0f}",
-            size=self.config.metric_text_size,
-        )
+            # Display robot reward
+            self.robot_reward_text.render_to(
+                self.canvas,
+                # Display reward to the left of robot arm base
+                dest=(
+                    10,
+                    self.config.scorebar_height + 15,
+                ),
+                text=f"Reward: {robot_reward:.0f}",
+                size=self.config.metric_text_size,
+            )
 
         # Display agent reward
         self.agent_reward_text.render_to(
