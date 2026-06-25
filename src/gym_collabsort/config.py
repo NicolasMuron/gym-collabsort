@@ -203,11 +203,11 @@ class Config:
         """Return the rewards array associated to object properties for the agent"""
 
         # Rows are indiced by object color, columns by object shape
-        return np.array([[8, 7, 6], [5, 4, 3], [2, 1, 0]])
+        return np.array([[9, 9, 9], [6, 6, 6], [3, 3, 3]])
 
     @property
     def robot_rewards(self) -> np.ndarray:
         """Return the rewards array associated to object properties for the robot"""
 
         # Rows are indiced by object color, columns by object shape
-        return np.array([[0, 1, 2],[3, 4, 5], [6, 7, 8]])
+        return np.array([[6, 6, 6], [9, 9, 9], [3, 3, 3]])
