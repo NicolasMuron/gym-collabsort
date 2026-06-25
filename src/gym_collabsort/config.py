@@ -192,14 +192,14 @@ class Config:
     # Base step reward
     step_reward: float = 0
 
-    # Negative reward when a collision happens
+    # Negative reward when a collision happens.
     collision_penalty: float = -10
 
     # Negative reward for movement
     movement_penalty = -1
 
     # Standard deviation of Gaussian noise added to the agent reward
-    reward_noise_std: float = 1.0
+    reward_noise_std: float = 0.0
 
     @property
     def agent_rewards(self) -> np.ndarray:
