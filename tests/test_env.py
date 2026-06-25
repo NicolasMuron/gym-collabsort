@@ -5,6 +5,7 @@ Unit tests for environment.
 import gymnasium as gym
 import pygame
 from gymnasium.utils.env_checker import check_env
+import numpy as np
 
 import gym_collabsort
 from gym_collabsort.config import Action, Config, RenderMode
@@ -75,10 +76,9 @@ def test_reward_noise_is_applied() -> None:
     env = CollabSortEnv(config=config)
     env.reset(seed=0)
 
-    first_reward = env.step(action=Action.NONE.value)[1]
-    second_reward = env.step(action=Action.NONE.value)[1]
+    rewards = [env.step(action=Action.NONE.value)[1] for _ in range(100)]
 
-    assert first_reward != second_reward
+    assert np.std(rewards) > 0.5
 
 
 def test_robotic_agent(pause_at_end: bool = False) -> None:
