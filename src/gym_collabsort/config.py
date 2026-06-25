@@ -199,7 +199,7 @@ class Config:
     movement_penalty = -1
 
     # Standard deviation of Gaussian noise added to the agent reward
-    reward_noise_std: float = 1.0
+    reward_noise_std: float = 2.0
 
     @property
     def agent_rewards(self) -> np.ndarray:
