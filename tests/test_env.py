@@ -189,6 +189,18 @@ def test_configurable_treadmills() -> None:
         env.close()
 
 
+def test_empty_treadmills_raises() -> None:
+    """Test that an empty treadmill configuration raises an error"""
+
+    try:
+        config = Config(active_treadmills=())
+        env = CollabSortEnv(config=config)
+        env.reset()
+        assert False, "Expected an error for empty treadmill configuration"
+    except (ValueError, AssertionError):
+        pass
+
+
 if __name__ == "__main__":
     # Standalone execution with pause at end
     test_robotic_agent(pause_at_end=True)
