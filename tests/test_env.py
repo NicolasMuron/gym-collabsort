@@ -6,6 +6,7 @@ import gymnasium as gym
 import pygame
 from gymnasium.utils.env_checker import check_env
 import numpy as np
+import pytest
 
 import gym_collabsort
 from gym_collabsort.config import Action, Config, RenderMode
@@ -238,13 +239,12 @@ def test_configurable_treadmills() -> None:
 def test_empty_treadmills_raises() -> None:
     """Test that an empty treadmill configuration raises an error"""
 
-    try:
-        config = Config(active_treadmills=())
+    config = Config(active_treadmills=())
+    
+    # Pytest will catch the error automatically and fail if it doesn't happen
+    with pytest.raises((ValueError, AssertionError)):
         env = CollabSortEnv(config=config)
         env.reset()
-        assert False, "Expected an error for empty treadmill configuration"
-    except (ValueError, AssertionError):
-        pass
 
 
 if __name__ == "__main__":
