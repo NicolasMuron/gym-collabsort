@@ -211,6 +211,10 @@ class Config:
         default_factory=lambda: np.array([[3, 4, 5], [6, 7, 8], [0, 1, 2]])
     )
 
+    def __post_init__(self) -> None:
+        if not self.active_treadmills:
+            raise ValueError("active_treadmills must contain at least one value.")
+
     @property
     def agent_rewards(self) -> np.ndarray:
         """Return the rewards array associated to object properties for the agent"""
