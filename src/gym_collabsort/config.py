@@ -202,13 +202,13 @@ class Config:
     reward_noise_std: float = 0.0
 
     # Whether non-stationary rewards enabled in the environment
-    enable_reward_change: bool = True
+    enable_reward_change: bool = False
 
     # Step threshold at which the agent reward matrix is switched
     reward_change_step: int = 250000
 
     agent_rewards_after: np.ndarray = field(
-        default_factory=lambda: np.array([[5, 4, 3], [8, 7, 6], [2, 1, 0]])
+        default_factory=lambda: np.array([[3, 4, 5], [6, 7, 8], [0, 1, 2]])
     )
 
     @property
