@@ -81,6 +81,22 @@ def test_reward_noise_is_applied() -> None:
     assert np.std(rewards) > 0.5
 
 
+def test_reward_noise_not_applied_when_zero() -> None:
+    """Test that no reward noise is applied when std is 0"""
+
+    config = Config(
+        reward_noise_std=0.0,
+        render_mode=RenderMode.RGB_ARRAY,
+        robot_enabled=False,
+    )
+    env = CollabSortEnv(config=config)
+    env.reset(seed=0)
+
+    rewards = [env.step(action=Action.NONE.value)[1] for _ in range(100)]
+
+    assert np.std(rewards) == 0.0
+
+
 def test_robotic_agent(pause_at_end: bool = False) -> None:
     """Test an agent using the same behavior as the robot, but with specific rewards"""
 
