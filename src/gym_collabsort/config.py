@@ -202,7 +202,7 @@ class Config:
     reward_noise_std: float = 0.0
 
     # Whether non-stationary rewards enabled in the environment
-    enable_reward_change: bool = False
+    enable_reward_change: bool = True
 
     # Step threshold at which the agent reward matrix is switched
     reward_change_step: int = 200000
