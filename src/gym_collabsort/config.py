@@ -205,7 +205,7 @@ class Config:
     enable_reward_change: bool = False
 
     # Step threshold at which the agent reward matrix is switched
-    reward_change_step: int = 100000
+    reward_change_step: int = 250000
 
     agent_rewards_after: np.ndarray = field(
         default_factory=lambda: np.array([[3, 4, 5], [0, 1, 2], [6, 7, 8]])
