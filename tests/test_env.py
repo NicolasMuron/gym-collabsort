@@ -239,10 +239,9 @@ def test_configurable_treadmills() -> None:
 def test_empty_treadmills_raises() -> None:
     """Test that an empty treadmill configuration raises an error"""
 
-    config = Config(active_treadmills=())
-    
-    # Pytest will catch the error automatically and fail if it doesn't happen
+    # Tout ce qui est dans ce bloc et qui lève une erreur valide le test !
     with pytest.raises((ValueError, AssertionError)):
+        config = Config(active_treadmills=())
         env = CollabSortEnv(config=config)
         env.reset()
 
