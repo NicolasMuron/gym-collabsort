@@ -76,6 +76,9 @@ class CollabSortEnv(gym.Env):
         else:
             self.robot = None
 
+        # Total number of environment steps executed since reset
+        self.total_steps: int = 0
+
         # Number of removed objects: placed by any arm or fallen from any treadmill.
         # Used to assess the end of episode
         self.n_removed_objects: int = 0
@@ -194,7 +197,24 @@ class CollabSortEnv(gym.Env):
             "n_placed_objects": self.board.agent_arm.n_placed_objects,
         }
 
+    def _get_active_agent_rewards(self) -> np.ndarray:
+        """Return the active agent reward matrix depending on the current step count."""
+
+        if not self.config.enable_reward_change:
+            return self.config.agent_rewards
+
+        if self.total_steps >= self.config.reward_change_step:
+            return self.config.agent_rewards_after
+
+        return self.config.agent_rewards
+
+    @property
+    def current_agent_rewards(self) -> np.ndarray:
+        return self._get_active_agent_rewards()
+
     def step(self, action: int) -> tuple[dict, float, bool, bool, dict]:
+        active_agent_rewards = self._get_active_agent_rewards()
+
         # Init step reward for agent and robot
         agent_reward: float = self.config.step_reward
         robot_reward: float = self.config.step_reward
@@ -279,7 +299,7 @@ class CollabSortEnv(gym.Env):
             elif agent_picked_object is not None:
                 # Compute agent reward
                 agent_reward += agent_picked_object.get_reward(
-                    rewards=self.config.agent_rewards
+                    rewards=active_agent_rewards
                 )
 
         # Update world state
@@ -294,6 +314,7 @@ class CollabSortEnv(gym.Env):
 
         self.agent_episode_reward += agent_reward
         self.robot_episode_reward += robot_reward
+        self.total_steps += 1
 
         observation = self._get_obs()
         info = self._get_info()

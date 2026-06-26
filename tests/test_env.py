@@ -81,6 +81,52 @@ def test_reward_noise_is_applied() -> None:
     assert np.std(rewards) > 0.5
 
 
+def test_reward_noise_not_applied_when_zero() -> None:
+    """Test that no reward noise is applied when std is 0"""
+
+    config = Config(
+        reward_noise_std=0.0,
+        render_mode=RenderMode.RGB_ARRAY,
+        robot_enabled=False,
+    )
+    env = CollabSortEnv(config=config)
+    env.reset(seed=0)
+
+    rewards = [env.step(action=Action.NONE.value)[1] for _ in range(100)]
+
+    assert np.std(rewards) == 0.0
+
+
+def test_reward_change_step_switches_matrices() -> None:
+    """Test that the agent reward matrix changes after the configured step threshold."""
+
+    agent_rewards_after = np.array(
+        [[10.0, 10.0, 10.0], [10.0, 10.0, 10.0], [10.0, 10.0, 10.0]]
+    )
+
+    config = Config(
+        render_mode=RenderMode.RGB_ARRAY,
+        robot_enabled=False,
+        enable_reward_change=True,  # 1. On active la fonctionnalité ici !
+        reward_change_step=5,  # 2. Le seuil choisi pour le test
+        agent_rewards_after=agent_rewards_after,
+    )
+    env = CollabSortEnv(config=config)
+    env.reset(seed=0)
+
+    assert np.array_equal(env.current_agent_rewards, config.agent_rewards)
+
+    for _ in range(5):
+        env.step(action=Action.NONE.value)
+
+    assert env.total_steps == 5
+    assert np.array_equal(env.current_agent_rewards, agent_rewards_after)
+
+    env.step(action=Action.NONE.value)
+    assert env.total_steps == 6
+    assert np.array_equal(env.current_agent_rewards, agent_rewards_after)
+
+
 def test_robotic_agent(pause_at_end: bool = False) -> None:
     """Test an agent using the same behavior as the robot, but with specific rewards"""
 
@@ -187,6 +233,18 @@ def test_configurable_treadmills() -> None:
         assert frame.ndim == 3
 
         env.close()
+
+
+def test_empty_treadmills_raises() -> None:
+    """Test that an empty treadmill configuration raises an error"""
+
+    try:
+        config = Config(active_treadmills=())
+        env = CollabSortEnv(config=config)
+        env.reset()
+        assert False, "Expected an error for empty treadmill configuration"
+    except (ValueError, AssertionError):
+        pass
 
 
 if __name__ == "__main__":
