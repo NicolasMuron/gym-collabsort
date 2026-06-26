@@ -97,6 +97,36 @@ def test_reward_noise_not_applied_when_zero() -> None:
     assert np.std(rewards) == 0.0
 
 
+def test_reward_change_step_switches_matrices() -> None:
+    """Test that the agent reward matrix changes after the configured step threshold."""
+
+    agent_rewards_after = np.array(
+        [[10.0, 10.0, 10.0], [10.0, 10.0, 10.0], [10.0, 10.0, 10.0]]
+    )
+
+    config = Config(
+        render_mode=RenderMode.RGB_ARRAY,
+        robot_enabled=False,
+        enable_reward_change=True,  # 1. On active la fonctionnalité ici !
+        reward_change_step=5,  # 2. Le seuil choisi pour le test
+        agent_rewards_after=agent_rewards_after,
+    )
+    env = CollabSortEnv(config=config)
+    env.reset(seed=0)
+
+    assert np.array_equal(env.current_agent_rewards, config.agent_rewards)
+
+    for _ in range(5):
+        env.step(action=Action.NONE.value)
+
+    assert env.total_steps == 5
+    assert np.array_equal(env.current_agent_rewards, agent_rewards_after)
+
+    env.step(action=Action.NONE.value)
+    assert env.total_steps == 6
+    assert np.array_equal(env.current_agent_rewards, agent_rewards_after)
+
+
 def test_robotic_agent(pause_at_end: bool = False) -> None:
     """Test an agent using the same behavior as the robot, but with specific rewards"""
 

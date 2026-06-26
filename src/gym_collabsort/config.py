@@ -3,7 +3,7 @@ Base types and configuration values.
 """
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum, StrEnum
 
 import numpy as np
@@ -200,6 +200,15 @@ class Config:
 
     # Standard deviation of Gaussian noise added to the agent reward
     reward_noise_std: float = 0.0
+
+    enable_reward_change: bool = True
+
+    # Step threshold at which the agent reward matrix is switched
+    reward_change_step: int = 100000
+
+    agent_rewards_after: np.ndarray = field(
+        default_factory=lambda: np.array([[3, 4, 5], [0, 1, 2], [6, 7, 8]])
+    )
 
     @property
     def agent_rewards(self) -> np.ndarray:
