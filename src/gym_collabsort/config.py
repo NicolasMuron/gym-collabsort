@@ -201,6 +201,7 @@ class Config:
     # Standard deviation of Gaussian noise added to the agent reward
     reward_noise_std: float = 0.0
 
+    # Whether non-stationary rewards enabled in the environment
     enable_reward_change: bool = True
 
     # Step threshold at which the agent reward matrix is switched
