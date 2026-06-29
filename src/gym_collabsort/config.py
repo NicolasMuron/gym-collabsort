@@ -80,7 +80,7 @@ class Config:
     robot_enabled: bool = True
 
     # Strategy used by the robot to decide its next action
-    robot_strategy: RobotStrategy = RobotStrategy.BEST_OBJECT
+    robot_strategy: RobotStrategy = RobotStrategy.RANDOM_ACTION
 
     # ---------- Window and board ----------
 
