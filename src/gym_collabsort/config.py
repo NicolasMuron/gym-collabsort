@@ -84,7 +84,7 @@ class Config:
     robot_strategy: RobotStrategy = RobotStrategy.BEST_OBJECT
 
     # Whether the robot acts only every other step
-    robot_slow_mode: bool = True
+    robot_slow_mode: bool = False
 
     # ---------- Window and board ----------
 
