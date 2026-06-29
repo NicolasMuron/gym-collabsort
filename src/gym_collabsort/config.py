@@ -64,6 +64,7 @@ class RobotStrategy(Enum):
     RANDOM_OBJECT = "random_object"
     CLOSEST_OBJECT = "closest_object"
     RANDOM_ACTION = "random_action"
+    AGENT_TARGET = "agent_target"
 
 
 @dataclass
@@ -80,7 +81,10 @@ class Config:
     robot_enabled: bool = True
 
     # Strategy used by the robot to decide its next action
-    robot_strategy: RobotStrategy = RobotStrategy.CLOSEST_OBJECT
+    robot_strategy: RobotStrategy = RobotStrategy.AGENT_TARGET
+
+    # Whether the robot acts only every other step
+    robot_slow_mode: bool = False
 
     # ---------- Window and board ----------
 

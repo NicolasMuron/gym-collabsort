@@ -17,16 +17,26 @@ class Robot:
         arm: Arm,
         rewards: np.ndarray,
         strategy: RobotStrategy | None = None,
+        slow_mode: bool = False,
+        agent_arm: Arm | None = None,
     ) -> None:
         self.board = board
         self.arm = arm
         self.rewards = rewards
         self.strategy = strategy or RobotStrategy.BEST_OBJECT
+        self.slow_mode = slow_mode
+        self.agent_arm = agent_arm
+        self._step_count = 0
 
     def choose_action(self) -> Action:
         """Return the chosen action"""
 
+        self._step_count += 1
+
         if self.arm.moving_back:
+            return Action.NONE
+
+        if self.slow_mode and self._step_count % 2 != 0:
             return Action.NONE
 
         if self.strategy == RobotStrategy.RANDOM_ACTION:
@@ -59,9 +69,24 @@ class Robot:
             return None
 
         if self.strategy == RobotStrategy.RANDOM_OBJECT:
-            # Fix: Use integers() to get a random index safely
             idx = self.board.rng.integers(len(reachable_objects))
             return reachable_objects[idx]
+
+        if self.strategy == RobotStrategy.AGENT_TARGET:
+            agent_target = self._get_agent_target_object()
+            if agent_target is not None and agent_target in reachable_objects:
+                return agent_target
+
+            if self.agent_arm is not None:
+                agent_pos = self.agent_arm.gripper.coords
+                fallback = min(
+                    reachable_objects,
+                    key=lambda obj: (
+                        abs(obj.coords.col - agent_pos.col)
+                        + abs(obj.coords.row - agent_pos.row)
+                    ),
+                )
+                return fallback
 
         if self.strategy == RobotStrategy.CLOSEST_OBJECT:
             return min(
@@ -82,6 +107,18 @@ class Robot:
         """Return a random action among the possible robot actions."""
 
         return self.board.rng.choice([Action.NONE, Action.UP, Action.DOWN, Action.PICK])
+
+    def _get_agent_target_object(self) -> Object | None:
+        """Return the object currently targeted by the agent if it is present on the board."""
+
+        if self.agent_arm is None:
+            return None
+
+        target_object = self.agent_arm.picked_object
+        if target_object is not None:
+            return target_object
+
+        return None
 
     def _get_reachable_objects(self) -> list[Object]:
         """Return the objects that can potentially be picked in the future."""
