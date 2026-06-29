@@ -81,10 +81,10 @@ class Config:
     robot_enabled: bool = True
 
     # Strategy used by the robot to decide its next action
-    robot_strategy: RobotStrategy = RobotStrategy.AGENT_TARGET
+    robot_strategy: RobotStrategy = RobotStrategy.BEST_OBJECT
 
     # Whether the robot acts only every other step
-    robot_slow_mode: bool = False
+    robot_slow_mode: bool = True
 
     # ---------- Window and board ----------
 
