@@ -7,6 +7,7 @@ import pygame
 from gymnasium.utils.env_checker import check_env
 import numpy as np
 import pytest
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import gym_collabsort
 from gym_collabsort.config import Action, Config, RenderMode
@@ -244,6 +245,55 @@ def test_empty_treadmills_raises() -> None:
         config = Config(active_treadmills=())
         env = CollabSortEnv(config=config)
         env.reset()
+
+
+def test_collision_drops_held_objects_and_increments_removed() -> None:
+    """Test that a collision forces both arms to drop their objects and increments n_removed_objects."""
+
+    # 1. Initialisation de l'environnement avec le robot activé
+    config = Config(render_mode=RenderMode.RGB_ARRAY, robot_enabled=True)
+    env = CollabSortEnv(config=config)
+    env.reset(seed=42)
+
+    # 2. On force la méthode act() des deux bras à retourner une collision (True, None, None)
+    # Le premier élément du tuple retourné par act() est le flag de collision.
+    env.board.robot_arm.act = MagicMock(return_value=(True, None, None))
+    env.board.agent_arm.act = MagicMock(return_value=(True, None, None))
+
+    # 3. On mock les conteneurs internes _picked_object pour vérifier que .empty() est bien appelé
+    env.board.robot_arm._picked_object = MagicMock()
+    env.board.agent_arm._picked_object = MagicMock()
+
+    # 4. On utilise patch.object pour faire croire à l'environnement que les deux bras tiennent un objet
+    # (indispensable si 'picked_object' est une @property dans vos classes Arm)
+    with (
+        patch.object(
+            type(env.board.robot_arm),
+            "picked_object",
+            new_callable=PropertyMock,
+            return_value=True,
+        ),
+        patch.object(
+            type(env.board.agent_arm),
+            "picked_object",
+            new_callable=PropertyMock,
+            return_value=True,
+        ),
+    ):
+        # Déclenche l'exécution des lignes de collision dans env.step()
+        env.step(action=Action.NONE.value)
+
+    # 5. Assertions pour valider la couverture et le comportement
+    assert env.n_collisions == 1
+
+    # On vérifie que .empty() a été appelé sur le conteneur d'objet de chaque bras
+    env.board.robot_arm._picked_object.empty.assert_called_once()
+    env.board.agent_arm._picked_object.empty.assert_called_once()
+
+    # On vérifie que n_removed_objects a bien été incrémenté de 2 (1 pour chaque objet tombé)
+    assert env.n_removed_objects == 2
+
+    env.close()
 
 
 if __name__ == "__main__":

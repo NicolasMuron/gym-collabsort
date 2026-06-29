@@ -72,6 +72,7 @@ class CollabSortEnv(gym.Env):
                 board=self.board,
                 arm=self.board.robot_arm,
                 rewards=config.robot_rewards,
+                strategy=config.robot_strategy,
             )
         else:
             self.robot = None

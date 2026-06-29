@@ -7,7 +7,7 @@ import numpy as np
 from ..board.arm import Arm
 from ..board.board import Board
 from ..board.object import Object
-from ..config import Action
+from ..config import Action, RobotStrategy
 
 
 class Robot:
@@ -16,60 +16,79 @@ class Robot:
         board: Board,
         arm: Arm,
         rewards: np.ndarray,
+        strategy: RobotStrategy | None = None,
     ) -> None:
         self.board = board
         self.arm = arm
         self.rewards = rewards
+        self.strategy = strategy or RobotStrategy.BEST_OBJECT
 
     def choose_action(self) -> Action:
         """Return the chosen action"""
 
-        # Wait by default
-        action: Action = Action.NONE
+        if self.arm.moving_back:
+            return Action.NONE
 
-        # Search for the best object to aim for
-        best_object = self._choose_best_object()
+        if self.strategy == RobotStrategy.RANDOM_ACTION:
+            return self._choose_random_action()
 
-        if best_object is not None:
-            if best_object.coords == self.arm.gripper.coords:
-                # The best object is pickable now
-                action = Action.PICK
-            elif (
-                best_object.coords.col - self.arm.base.coords.col
-                == best_object.coords.row - self.arm.gripper.coords.row
-            ):
-                # The best object will be pickable if a downward movement starts now
-                action = Action.DOWN
-            elif (
-                best_object.coords.col - self.arm.base.coords.col
-                == self.arm.gripper.coords.row - best_object.coords.row
-            ):
-                # The best object will be pickable if an upward movement starts now
-                action = Action.UP
+        target_object = self._select_target_object()
+        if target_object is None:
+            return Action.NONE
 
-        return action
+        if target_object.coords == self.arm.gripper.coords:
+            return Action.PICK
 
-    def _choose_best_object(self) -> Object | None:
-        """Return the best object to aim for (the most rewarding of the objects reachable in the future)"""
+        target_col_delta = target_object.coords.col - self.arm.base.coords.col
+        gripper_row = self.arm.gripper.coords.row
+        target_row = target_object.coords.row
 
-        reachable_objects: list[Object] = []
+        if target_col_delta == target_row - gripper_row:
+            return Action.DOWN
 
-        # Exclude objects impossible to pick because they are already too close to the arm column
-        reachable_objects = [
+        if target_col_delta == gripper_row - target_row:
+            return Action.UP
+
+        return Action.NONE
+
+    def _select_target_object(self) -> Object | None:
+        """Return the target object according to the configured strategy."""
+
+        reachable_objects = self._get_reachable_objects()
+        if not reachable_objects:
+            return None
+
+        if self.strategy == RobotStrategy.RANDOM_OBJECT:
+            # Fix: Use integers() to get a random index safely
+            idx = self.board.rng.integers(len(reachable_objects))
+            return reachable_objects[idx]
+
+        if self.strategy == RobotStrategy.CLOSEST_OBJECT:
+            return min(
+                reachable_objects,
+                key=lambda obj: (
+                    abs(obj.coords.col - self.arm.gripper.coords.col)
+                    + abs(obj.coords.row - self.arm.gripper.coords.row)
+                ),
+            )
+
+        # Default behavior: choose the most rewarding reachable object
+        reachable_objects.sort(
+            key=lambda obj: obj.get_reward(rewards=self.rewards), reverse=True
+        )
+        return reachable_objects[0]
+
+    def _choose_random_action(self) -> Action:
+        """Return a random action among the possible robot actions."""
+
+        return self.board.rng.choice([Action.NONE, Action.UP, Action.DOWN, Action.PICK])
+
+    def _get_reachable_objects(self) -> list[Object]:
+        """Return the objects that can potentially be picked in the future."""
+
+        return [
             obj
             for obj in self.board.objects
             if (obj.coords.col - self.arm.gripper.coords.col)
             >= abs(obj.coords.row - self.arm.gripper.coords.row)
         ]
-
-        if len(reachable_objects) > 0:
-            # Sort reachable objects by descending reward
-            reachable_objects.sort(
-                key=lambda o: o.get_reward(rewards=self.rewards), reverse=True
-            )
-
-            # Return the reachable object with the highest reware
-            return reachable_objects[0]
-
-        # No reachable object
-        return None
