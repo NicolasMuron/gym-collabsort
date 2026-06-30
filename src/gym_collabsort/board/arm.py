@@ -227,7 +227,6 @@ class Arm:
                 # Change collision penalty status (both grippers will move back to their base)
                 self.collision_penalty = True
 
-                # SÉCURISATION DU TYPEER : On valide que other_arm n'est pas None
                 if other_arm is not None:
                     if not other_arm.is_retracted():
                         # Penalty state is not applied if the other arm is already retracted.

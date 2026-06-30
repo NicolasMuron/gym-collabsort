@@ -109,8 +109,8 @@ def test_reward_change_step_switches_matrices() -> None:
     config = Config(
         render_mode=RenderMode.RGB_ARRAY,
         robot_enabled=False,
-        enable_reward_change=True,  # 1. On active la fonctionnalité ici !
-        reward_change_step=5,  # 2. Le seuil choisi pour le test
+        enable_reward_change=True,
+        reward_change_step=5, 
         agent_rewards_after=agent_rewards_after,
     )
     env = CollabSortEnv(config=config)
@@ -240,7 +240,6 @@ def test_configurable_treadmills() -> None:
 def test_empty_treadmills_raises() -> None:
     """Test that an empty treadmill configuration raises an error"""
 
-    # Tout ce qui est dans ce bloc et qui lève une erreur valide le test !
     with pytest.raises((ValueError, AssertionError)):
         config = Config(active_treadmills=())
         env = CollabSortEnv(config=config)
@@ -250,22 +249,16 @@ def test_empty_treadmills_raises() -> None:
 def test_collision_drops_held_objects_and_increments_removed() -> None:
     """Test that a collision forces both arms to drop their objects and increments n_removed_objects."""
 
-    # 1. Initialisation de l'environnement avec le robot activé
     config = Config(render_mode=RenderMode.RGB_ARRAY, robot_enabled=True)
     env = CollabSortEnv(config=config)
     env.reset(seed=42)
 
-    # 2. On force la méthode act() des deux bras à retourner une collision (True, None, None)
-    # Le premier élément du tuple retourné par act() est le flag de collision.
     env.board.robot_arm.act = MagicMock(return_value=(True, None, None))
     env.board.agent_arm.act = MagicMock(return_value=(True, None, None))
 
-    # 3. On mock les conteneurs internes _picked_object pour vérifier que .empty() est bien appelé
     env.board.robot_arm._picked_object = MagicMock()
     env.board.agent_arm._picked_object = MagicMock()
 
-    # 4. On utilise patch.object pour faire croire à l'environnement que les deux bras tiennent un objet
-    # (indispensable si 'picked_object' est une @property dans vos classes Arm)
     with (
         patch.object(
             type(env.board.robot_arm),
@@ -280,17 +273,13 @@ def test_collision_drops_held_objects_and_increments_removed() -> None:
             return_value=True,
         ),
     ):
-        # Déclenche l'exécution des lignes de collision dans env.step()
         env.step(action=Action.NONE.value)
-
-    # 5. Assertions pour valider la couverture et le comportement
+        
     assert env.n_collisions == 1
 
-    # On vérifie que .empty() a été appelé sur le conteneur d'objet de chaque bras
     env.board.robot_arm._picked_object.empty.assert_called_once()
     env.board.agent_arm._picked_object.empty.assert_called_once()
 
-    # On vérifie que n_removed_objects a bien été incrémenté de 2 (1 pour chaque objet tombé)
     assert env.n_removed_objects == 2
 
     env.close()

@@ -229,7 +229,6 @@ def test_robot_slow_mode_returns_none_on_odd_steps() -> None:
     env = CollabSortEnv(config=config)
     env.reset(seed=0)
 
-    # Initialisation du robot avec slow_mode=True
     robot = Robot(
         board=env.board,
         arm=env.board.robot_arm,
@@ -238,13 +237,11 @@ def test_robot_slow_mode_returns_none_on_odd_steps() -> None:
         slow_mode=True,
     )
 
-    # Étape 1 : Compteur = 1 (Impair) -> Doit retourner Action.NONE
     action_1 = robot.choose_action()
     assert action_1 == Action.NONE
     assert robot._step_count == 1
 
-    # Étape 2 : Compteur = 2 (Pair) -> Doit calculer une vraie action
-    robot.choose_action()  # <--- Correction : On appelle la 2ème étape !
+    robot.choose_action()
     assert robot._step_count == 2
 
     env.close()
@@ -256,7 +253,6 @@ def test_get_agent_target_object_returns_picked_object() -> None:
     env = CollabSortEnv(config=config)
     env.reset(seed=0)
 
-    # Création d'un bras mocké pour l'agent qui possède un objet factice
     mock_agent_arm = MagicMock()
     mock_object = MagicMock()
     mock_agent_arm.picked_object = mock_object
@@ -268,10 +264,8 @@ def test_get_agent_target_object_returns_picked_object() -> None:
         agent_arm=mock_agent_arm,
     )
 
-    # Exécution de la méthode
     target = robot._get_agent_target_object()
 
-    # Assertions : l'objet retourné doit être celui porté par l'agent
     assert target is mock_object
 
     env.close()
@@ -283,7 +277,6 @@ def test_get_agent_target_object_returns_none_when_agent_arm_is_none() -> None:
     env = CollabSortEnv(config=config)
     env.reset(seed=0)
 
-    # Initialisation explicite sans agent_arm
     robot = Robot(
         board=env.board,
         arm=env.board.robot_arm,
