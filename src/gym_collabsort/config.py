@@ -57,6 +57,16 @@ class RenderMode(StrEnum):
     NONE = "None"
 
 
+class RobotStrategy(Enum):
+    """Possible strategies for the robot to select targets or actions"""
+
+    BEST_OBJECT = "best_object"
+    RANDOM_OBJECT = "random_object"
+    CLOSEST_OBJECT = "closest_object"
+    RANDOM_ACTION = "random_action"
+    AGENT_TARGET = "agent_target"
+
+
 @dataclass
 class Config:
     """Configuration class with default values"""
@@ -69,6 +79,12 @@ class Config:
 
     # Whether the robot arm is enabled in the environment
     robot_enabled: bool = True
+
+    # Strategy used by the robot to decide its next action
+    robot_strategy: RobotStrategy = RobotStrategy.BEST_OBJECT
+
+    # Whether the robot acts only every other step
+    robot_slow_mode: bool = False
 
     # ---------- Window and board ----------
 
