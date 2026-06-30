@@ -157,7 +157,7 @@ def test_robotic_agent(pause_at_end: bool = False) -> None:
         _ = pygame.event.wait()
 
     env.close()
-    
+
 
 def test_disabled_robot_env() -> None:
     """Test environment with robot arm disabled"""
