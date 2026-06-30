@@ -224,7 +224,8 @@ class Config:
     reward_change_step: int = 250000
 
     agent_rewards_after: np.ndarray = field(
-        default_factory=lambda: np.array([[3, 4, 5], [6, 7, 8], [0, 1, 2]])
+        default_factory=lambda: np.array([[3, 4, 5], [6, 7, 8], [0, 1, 2]]),
+        compare=False,
     )
 
     def __post_init__(self) -> None:
