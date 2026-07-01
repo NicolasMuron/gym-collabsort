@@ -150,7 +150,7 @@ class Config:
 
     # Active treadmills: any combination of "upper", "middle", "lower"
     # Must contain at least one value.
-    active_treadmills: tuple[str, ...] = ("upper", "lower")
+    active_treadmills: tuple[str, ...] = ("upper", "middle", "lower")
 
     @property
     def treadmill_rows(self) -> list[int]:
