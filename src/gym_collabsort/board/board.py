@@ -287,7 +287,7 @@ class Board:
             # Display collision count to the left, between treadmills
             dest=(
                 10,
-                self.config.board_height // 2 + self.config.scorebar_height - 7,
+                self.config.board_height // 2 + self.config.scorebar_height - 6,
             ),
             text=f"Collisions: {collision_count:.0f}",
             size=self.config.metric_text_size,
