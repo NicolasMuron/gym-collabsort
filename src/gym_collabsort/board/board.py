@@ -284,10 +284,13 @@ class Board:
         # Display collision count
         self.collision_text.render_to(
             self.canvas,
-            # Display collision count to the left, between treadmills
+            # Display collision count to the left, one line above the middle treadmill
             dest=(
                 10,
-                self.config.board_height // 2 + self.config.scorebar_height - 6,
+                self.config.board_height // 2
+                + self.config.scorebar_height
+                - 7
+                - 3*self.config.metric_text_size,
             ),
             text=f"Collisions: {collision_count:.0f}",
             size=self.config.metric_text_size,
